@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Notifications\Notifiable;
 
 class Sector extends Model
 {
-    use HasFactory, Notifiable;
+    use HasFactory;
+
+    protected $table = 'sectors';
 
     /**
      * The attributes that are mass assignable.
@@ -18,8 +19,8 @@ class Sector extends Model
      */
     protected $fillable = [
         'name',
-        'device_count',
-        'user_id',
+        'devices_count',
+        'user_id'
     ];
 
     /**
@@ -27,7 +28,6 @@ class Sector extends Model
      * One to Many
      * @return HasMany
      * */
-
     public function devices(): HasMany
     {
         return $this->hasMany(Device::class, 'sector_id');

@@ -9,74 +9,29 @@ use Illuminate\Http\Response;
 class SectorController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        try {
-            // Fetch daftar sektor
-            $sectors = Sector::where('user_id', auth()->id())
-                ->get();
-
-            $data['status'] = true;
-            $data['message'] = 'Berhasil mengambil data sektor';
-            $data['data'] = $sectors;
-
-            return response()->json($data, Response::class::HTTP_OK);
-        } catch (\Throwable $e) {
-            return response()->json([
-                'message' => 'Kesalahan server, silahkan coba lagi dan hubungi customer service'
-            ], Response::class::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(SectorRequest $request)
     {
         try {
             // Validasi data input
-            $validatedData = $request->validated();
+            $sectorData = $request->validated();
+            $sectorData['user_id'] = auth()->id();
 
-            $validatedData['user_id'] = auth()->id();
-
-            // Buat data sektor baru
-            Sector::create($validatedData);
+            // Simpan sektor baru
+            Sector::create($sectorData);
 
             return response()->json([
                 'status' => true,
-                'message' => 'Sektor berhasil dibuat',
+                'message' => 'Sektor berhasil ditambahkan'
             ], Response::class::HTTP_CREATED);
         } catch (\Throwable $e) {
+            // Jika terjadi kesalahan pada server
             return response()->json([
+                'status' => false,
                 'message' => 'Kesalahan server, silahkan coba lagi dan hubungi customer service'
             ], Response::class::HTTP_INTERNAL_SERVER_ERROR);
         }
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Sector $sector)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Sector $sector)
-    {
-        //
     }
 
     /**
@@ -86,17 +41,19 @@ class SectorController extends Controller
     {
         try {
             // Validasi data input
-            $validatedData = $request->validated();
+            $sectorData = $request->validated();
 
             // Update data sektor
-            $sector->update($validatedData);
+            $sector->update($sectorData);
 
             return response()->json([
                 'status' => true,
                 'message' => 'Sektor berhasil diperbarui',
             ], Response::class::HTTP_OK);
+
         } catch (\Throwable $e) {
             return response()->json([
+                // Jika terjadi kesalahan pada server
                 'status' => false,
                 'message' => 'Kesalahan server, silahkan coba lagi dan hubungi customer service'
             ], Response::class::HTTP_INTERNAL_SERVER_ERROR);
@@ -109,24 +66,25 @@ class SectorController extends Controller
     public function destroy(Sector $sector)
     {
         try {
-            // Hitung jumlah perangkat dalam sektor
-            $deviceCount = $sector->devices()->count();
+            // Hitung total perangkat yang terkait pada sektor
+            $totalDevices = $sector->devices()->count();
 
-            // Check apakah sektor ini memiliki perangkat
-            if ($deviceCount > 0) {
+            // Jika total > 0, maka tidak bisa dihapus
+            if ($totalDevices > 0) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Sektor ini masih memiliki perangkat, silahkan pindahkan dan hapus perangkat terlebih dahulu'
-                ], Response::class::HTTP_OK);
+                ], Response::class::HTTP_CONFLICT);
             }
 
-            // Hapus sektor jika tidak ada perangkat
+            // Hapus sektor
             $sector->delete();
 
             return response([
                 'status' => true,
                 'message' => 'Sektor telah berhasil dihapus',
             ], Response::class::HTTP_OK);
+
         } catch (\Throwable $e) {
             return response()->json([
                 'status' => false,

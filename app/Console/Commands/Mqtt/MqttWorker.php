@@ -1,60 +1,1 @@
-<?php
-
-namespace App\Console\Commands\Mqtt;
-
-use Illuminate\Console\Command;
-use PhpParser\Node\Scalar\String_;
-
-class MqttWorker extends Command
-{
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'app:mqtt-worker';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Command description';
-
-    /**
-     * Execute the console command.
-     */
-    public function handle()
-    {
-        //
-    }
-
-    /**
-     * Handle incoming sensor data from MQTT broker
-     * */
-    private function handleSensorData(string $topic, string $message)
-    {
-        // Todo: Handle received sensor data here
-    }
-
-    /**
-     * Device Irrigation Status Handler
-     * */
-    private function handleDeviceIrrigationStatus(string $topic, string $message)
-    {
-        // Todo: Handle device irrigation status changes here
-    }
-
-    private function handleDeviceSmartAiStatus(string $topic, string $message)
-    {
-        // Todo: Handle device smart ai status changes here
-    }
-
-    /**
-     * Device Status Handler
-     * */
-    private function handleDeviceStatus(string $topic, string $message)
-    {
-        // Todo: Handle device status changes here
-    }
-}
+<?phpnamespace App\Console\Commands\Mqtt;use App\Models\Device;use App\Models\WateringLog;use Illuminate\Console\Command;use PhpMqtt\Client\Facades\MQTT;class MqttWorker extends Command{    /**     * The name and signature of the console command.     *     * @var string     */    protected $signature = 'app:mqtt-worker';    /**     * The console command description.     *     * @var string     */    protected $description = 'Command description';    /**     * Execute the console command.     */    public function handle(): void    {        try {            $mqtt = MQTT::connection();            $mqtt->subscribe('device/+/state/status', function (string $topic, string $message) {                $this->handleDeviceStatus($topic, $message);            });            $mqtt->subscribe('device/+/state/irrigation', function (string $topic, string $message) {                $this->handleDeviceIrrigationState($topic, $message);            });            $mqtt->subscribe('device/+/state/ai', function (string $topic, string $message) {                $this->handleDeviceAiState($topic, $message);            });            $mqtt->subscribe('device/+/event/irrigation/history', function (string $topic, string $message) {                $this->handlePlantWateringLog($topic, $message);            });            $mqtt->loop();        } catch (\Throwable $e) {            sleep(10);        }    }    /**     * Device Status Handler     * */    private function handleDeviceStatus(string $topic, string $message): void    {        // Todo: Handle device status changes here        $topic = $this->parseTopic($topic);        logs();        $data = json_decode($message, true);        if ($device = Device::find($topic['id'])) {            $device->status = (bool)$data['status'];            $device->save();        }    }    /**     * Device Irrigation State Handler     * */    private function handleDeviceIrrigationState(string $topic, string $message): void    {        // Todo: Handle device irrigation status changes here        $topic = $this->parseTopic($topic);        $data = json_decode($message, true);        if ($device = Device::find($topic['id'])) {            // Simpan dalam integer langsung dari esp32            $device->irrigation_state = (int)$data['irrigation_state'];            $device->save();        }    }    /**     * Device Ai State Handler     * */    private function handleDeviceAiState(string $topic, string $message): void    {        // Todo: Handle device ai status changes here        $topic = $this->parseTopic($topic);        $data = json_decode($message, true);        if ($device = Device::find($topic['id'])) {            $device->ai_status = (bool)$data['ai_active'];            $device->save();        }    }    private function handlePlantWateringLog(string $topic, string $message): void    {        $topic = $this->parseTopic($topic);        // Todo: Handle plant watering log changes here        $data = json_decode($message, true);        //if ($device = Device::find($topic['id'])) {        //        //}    }    private function parseTopic(string $topic): array    {        $parts = explode('/', $topic);        return [            'id' => $parts[1] ?? null,            'state_type' => $parts[3] ?? null        ];    }}

@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Notifications\Notifiable;
 
 class Device extends Model
 {
-    use HasFactory, Notifiable;
+    use HasFactory;
+
+    protected $table = 'devices';
 
     /**
      * The attributes that are mass assignable.
@@ -21,11 +22,13 @@ class Device extends Model
         'sector_id',
         'mac_address',
         'status',
+        'irrigation_state',
+        'ai_status'
     ];
 
     /**
-     * Relation table sector ke device
-     * One to Many
+     * Relasi table device ke sector
+     * Many to One
      * @return BelongsTo
      * */
     public function sector(): BelongsTo

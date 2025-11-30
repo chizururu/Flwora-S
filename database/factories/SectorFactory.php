@@ -13,6 +13,9 @@ class SectorFactory extends Factory
     public function definition(): array
     {
         return [
+            'name' => $this->faker->name(),
+            'devices_count' => $this->faker->randomNumber(),
+            'user_id' => $this->faker->randomNumber(),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ];

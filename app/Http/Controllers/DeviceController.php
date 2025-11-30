@@ -2,57 +2,93 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Device\DeviceCreateRequest;
+use App\Http\Requests\Device\DeviceUpdateRequest;
+use App\Http\Requests\Sector\SectorRequest;
 use App\Models\Device;
+use App\Models\Sector;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class DeviceController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(DeviceCreateRequest $request)
     {
-        //
-    }
+        try {
+            // Validasi data
+            $deviceData = $request->validated();
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Device $device)
-    {
-        //
-    }
+            // Ambil id dari sektor default "Home" milik user
+            // Catatan: setiap user memiliki sektor 'Home' secara otomatis dan terkunci
+            $defaultSectorId = auth()->user()->sectors()->where('name', 'Home')->value('id');
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Device $device)
-    {
-        //
+            // Set devices baru agar otomatis masuk ke sektor default
+            $deviceData['sector_id'] = $defaultSectorId;
+
+            // Simpan perangkat
+            $device = Device::create($deviceData);
+
+            // Increment jumlah perangkat pada sektor
+            $device->sector()->increment('devices_count');
+
+            return response()->json([
+                "status" => true,
+                'message' => 'Perangkat berhasil ditambahkan'
+            ], Response::class::HTTP_CREATED);
+
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Kesalahan server, silahkan coba lagi dan hubungi customer service'
+            ], Response::class::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Device $device)
+    public function update(DeviceUpdateRequest $request, Device $device)
     {
-        //
+        try {
+            // Validasi data input
+            $deviceData = $request->validated();
+
+            if ($deviceData['action'] === 'rename_device') {
+                // Update data device (name)
+                $device->name = $deviceData['name'];
+                $device->save();
+            }
+
+            if ($deviceData['action'] === 'move_sector') {
+                // Update data device (sector_id)
+                $oldSectorId = $device->sector_id;
+                $newSectorId = $deviceData['sector_id'];
+
+                if ($oldSectorId != $newSectorId) {
+                    $device->sector_id = $newSectorId;
+                    $device->save();
+
+                    // Kurangi jumlah device di sektor lama
+                    Sector::where('id', $oldSectorId)->decrement('devices_count');
+
+                    // Tambahkan jumlah perangkat di sektor baru
+                    Sector::where('id', $newSectorId)->increment('devices_count');
+                }
+            }
+
+            return response()->json([
+                "status" => true,
+                'message' => 'Perangkat berhasil diperbarui'
+            ], Response::class::HTTP_OK);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Kesalahan server, silahkan coba lagi dan hubungi customer service'
+            ], Response::class::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -60,6 +96,24 @@ class DeviceController extends Controller
      */
     public function destroy(Device $device)
     {
-        //
+        try {
+            $sectorId = $device->sector_id;
+
+            // Hapus data perangkat
+            $device->delete();
+
+            // Kurangi jumlah sektor
+            Sector::where('id', $sectorId)->decrement('devices_count');
+
+            return response()->json([
+                "status" => true,
+                'message' => 'Perangkat berhasil dihapus'
+            ], Response::class::HTTP_OK);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Kesalahan server, silahkan coba lagi dan hubungi customer service'
+            ], Response::class::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }
