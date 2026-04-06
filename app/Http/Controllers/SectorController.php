@@ -19,11 +19,12 @@ class SectorController extends Controller
             $sectorData['user_id'] = auth()->id();
 
             // Simpan sektor baru
-            Sector::create($sectorData);
+            $sector = Sector::create($sectorData);
 
             return response()->json([
                 'status' => true,
-                'message' => 'Sektor berhasil ditambahkan'
+                'message' => 'Sektor berhasil ditambahkan',
+                'data' => ['sector' => $sector],
             ], Response::class::HTTP_CREATED);
         } catch (\Throwable $e) {
             // Jika terjadi kesalahan pada server

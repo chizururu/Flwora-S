@@ -36,7 +36,8 @@ class DeviceController extends Controller
 
             return response()->json([
                 "status" => true,
-                'message' => 'Perangkat berhasil ditambahkan'
+                'message' => 'Perangkat berhasil ditambahkan',
+                'data' => ['device' => $device],
             ], Response::class::HTTP_CREATED);
 
         } catch (\Throwable $e) {
