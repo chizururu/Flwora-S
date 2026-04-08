@@ -26,7 +26,7 @@ class AuthController extends Controller
                     $error = ['email' => ['Email tidak ditemukan']];
                     $status = Response::class::HTTP_NOT_FOUND;
                 } else {
-                    $error = ['email' => ['Password salah']];
+                    $error = ['password' => ['Password salah']];
                     $status = Response::class::HTTP_UNAUTHORIZED;
                 }
 

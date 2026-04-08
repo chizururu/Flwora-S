@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Device extends Model
 {
@@ -34,5 +35,15 @@ class Device extends Model
     public function sector(): BelongsTo
     {
         return $this->belongsTo(Sector::class, 'sector_id');
+    }
+
+    /**
+     * Relation table device ke irrigation history
+     * One to Many
+     * @return HasMany
+     * */
+    public function irrigationHistories(): HasMany
+    {
+        return $this->hasMany(IrrigationHistories::class, 'device_id');
     }
 }
