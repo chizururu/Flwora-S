@@ -19,6 +19,7 @@ class Device extends Model
      * @var list<string>
      */
     protected $fillable = [
+        'id',
         'name',
         'sector_id',
         'mac_address',

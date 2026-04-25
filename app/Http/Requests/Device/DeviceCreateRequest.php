@@ -17,6 +17,7 @@ class DeviceCreateRequest extends Request
     public function rules(): array
     {
         return [
+            'id' => ['required', 'integer', 'unique:devices,id'],
             'name' => ['required', 'string', 'min:4', 'max:20', $this->uniqueDeviceNamePerUserRule()],
             'sector_id' => ['sometimes', 'string'],
             'mac_address' => ['required', 'string', 'unique:devices,mac_address']

@@ -82,7 +82,8 @@ class DeviceController extends Controller
 
             return response()->json([
                 "status" => true,
-                'message' => 'Perangkat berhasil diperbarui'
+                'message' => 'Perangkat berhasil diperbarui',
+                'data' => [$device]
             ], Response::class::HTTP_OK);
         } catch (\Throwable $e) {
             return response()->json([

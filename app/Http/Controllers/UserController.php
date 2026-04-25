@@ -13,14 +13,13 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UserRequest $request, string $id)
+    public function updateProfile(UserRequest $request)
     {
         try {
+            $user = $request->user();
+
             // Validasi input
             $userData = $request->validated();
-
-            // Ambil user yang akan diupdate
-            $user = User::findOrFail($id);
 
             // Tentukan pesan sesuai aksi
             $message = match ($userData['action']) {

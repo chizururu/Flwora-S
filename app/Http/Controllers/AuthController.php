@@ -21,7 +21,7 @@ class AuthController extends Controller
             $user = User::where('email', $credentials['email'])->first();
 
             // Jika user tidak ditemukan atau password tidak cocok kembalikan response error secara spesifik
-            if (!$user || Hash::check($credentials['password'], $user->password)) {
+            if (!$user || !Hash::check($credentials['password'], $user->password)) {
                 if (!$user) {
                     $error = ['email' => ['Email tidak ditemukan']];
                     $status = Response::class::HTTP_NOT_FOUND;

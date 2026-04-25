@@ -50,6 +50,7 @@ class SectorController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => 'Sektor berhasil diperbarui',
+                'data' => ['sector' => $sector],
             ], Response::class::HTTP_OK);
 
         } catch (\Throwable $e) {

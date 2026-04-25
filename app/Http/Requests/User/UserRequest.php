@@ -24,7 +24,6 @@ class UserRequest extends Request
                 'required_if:action,update',
                 'string',
                 'max:50',
-                $this->uniqueNamePerUserRule()
             ],
 
             // Validation rule untuk reset password
@@ -42,12 +41,5 @@ class UserRequest extends Request
             ],
 
         ];
-    }
-
-    protected function uniqueNamePerUserRule(): Unique
-    {
-        return Rule::unique('users', 'name')
-            ->where('user_id', $this->user()->id)
-            ->ignore($this->route('user'));
     }
 }
