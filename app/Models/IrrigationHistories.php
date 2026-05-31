@@ -31,7 +31,7 @@ class IrrigationHistories extends Model
      * Many to One
      * @return BelongsTo
      * */
-    public function sector(): BelongsTo
+    public function device(): BelongsTo
     {
         return $this->belongsTo(Device::class, 'device_id');
     }
